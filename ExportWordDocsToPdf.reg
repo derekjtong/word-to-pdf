@@ -5,11 +5,11 @@ Windows Registry Editor Version 5.00
 "Icon"="WINWORD.EXE"
 
 [HKEY_CLASSES_ROOT\Directory\Background\shell\ExportWordPDF\command]
-@="powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:\\Scripts\\ExportWordDocsToPdf.ps1\" -SourcePath \"%V\" -Overwrite"
+@="powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:\\Scripts\\ExportWordDocsToPdf.ps1\" -SourcePath \"%V\""
 
 [HKEY_CLASSES_ROOT\Directory\shell\ExportWordPDF]
 @="Export Word Docs to PDF"
 "Icon"="WINWORD.EXE"
 
 [HKEY_CLASSES_ROOT\Directory\shell\ExportWordPDF\command]
-@="powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:\\Scripts\\ExportWordDocsToPdf.ps1\" -SourcePath \"%1\" -Overwrite"
+@="powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:\\Scripts\\ExportWordDocsToPdf.ps1\" -SourcePath \"%1\""
