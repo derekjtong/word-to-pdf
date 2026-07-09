@@ -13,36 +13,27 @@ A PowerShell script that batch-converts Word documents (`.doc`, `.docx`, `.docm`
 .\ExportWordDocsToPdf.ps1 [-SourcePath <path>] [-Recurse] [-Overwrite] [-ShowWord] [-NoPause] [-Quiet]
 ```
 
-### Parameters
-
-| Parameter       | Description                                                          |
-| --------------- | ---------------------------------------------------------------------|
-| `-SourcePath`    | Folder to scan for Word documents. Defaults to the script's folder. |
-| `-Recurse`       | Include subfolders when searching for documents.                    |
-| `-Overwrite`     | Replace existing PDFs without asking. Without this flag, the script prompts for each existing PDF. |
-| `-ShowWord`      | Show the Word application window during conversion.                 |
-| `-NoPause`       | Don't wait for a keypress before closing the window.                |
-| `-Quiet`         | Compact output and no prompts: one progress line per file (`[3/10] report.docx`) plus the final summary, warnings, and errors. Existing PDFs are skipped unless `-Overwrite` is also given, and the window closes automatically (implies `-NoPause`). For full output that still closes automatically, use `-NoPause` alone. |
+| Parameter     | Description                                                          |
+| ------------- | ---------------------------------------------------------------------|
+| `-SourcePath` | Folder to scan for Word documents. Defaults to the script's folder.  |
+| `-Recurse`    | Include subfolders when searching for documents.                    |
+| `-Overwrite`  | Replace existing PDFs without asking.                                |
+| `-ShowWord`   | Show the Word application window during conversion.                 |
+| `-NoPause`    | Don't wait for a keypress before closing the window.                |
+| `-Quiet`      | Compact one-line-per-file progress, no prompts, closes automatically (implies `-NoPause`). Existing PDFs are skipped unless `-Overwrite` is also given. |
 
 ### Existing PDFs
 
-If a document already has a matching PDF (e.g. `hello.docx` next to `hello.pdf`), the script asks whether to replace it:
+Without `-Overwrite` or `-Quiet`, the script prompts per file:
 
 ```
 PDF already exists: C:\Documents\Reports\hello.pdf
 Replace it? [Y]es / [N]o / [A]ll / n[o]ne
 ```
 
-- **Y** — replace this PDF
-- **N** — skip this PDF
-- **A** — replace this and all remaining PDFs without asking again
-- **O** — skip this and all remaining existing PDFs without asking again
-
-Pass `-Overwrite` to skip the prompt entirely and replace everything. With `-Quiet`, the script never prompts: existing PDFs are replaced if `-Overwrite` is given and skipped otherwise.
+`-Overwrite` replaces everything without prompting; `-Quiet` never prompts (replaces only if `-Overwrite` is also set).
 
 ### Example
-
-Convert all Word documents in a folder and its subfolders, overwriting any existing PDFs:
 
 ```powershell
 .\ExportWordDocsToPdf.ps1 -SourcePath "C:\Documents\Reports" -Recurse -Overwrite
@@ -50,12 +41,16 @@ Convert all Word documents in a folder and its subfolders, overwriting any exist
 
 ## Explorer context menu (optional)
 
-`ExportWordDocsToPdf.reg` adds an **"Export Word Docs to PDF"** option to the right-click menu when you right-click a folder or its background in File Explorer.
+Two `.reg` files add an **"Export Word Docs to PDF"** right-click option (on folders and folder backgrounds) — they're alternatives, not both-at-once, since they register the same menu entry:
 
-1. Copy `ExportWordDocsToPdf.ps1` to `C:\Scripts\ExportWordDocsToPdf.ps1` (or edit the `.reg` file to point at a different location).
-2. Double-click `ExportWordDocsToPdf.reg` and confirm the registry import.
-3. Right-click any folder (or the background of a folder) and choose **Export Word Docs to PDF**.
-4. To update the script, simply replace `C:\Scripts\ExportWordDocsToPdf.ps1` with the latest file.
+- `ExportWordDocsToPdf.reg` — normal mode (prompts, full output)
+- `ExportWordDocsToPdf-quiet.reg` — runs with `-Overwrite -Quiet`
+
+Setup:
+
+1. Copy `ExportWordDocsToPdf.ps1` to `C:\Scripts\ExportWordDocsToPdf.ps1` (or edit the `.reg` file to point elsewhere).
+2. Double-click the `.reg` file of your choice and confirm the import.
+3. Right-click a folder (or its background) and choose **Export Word Docs to PDF**.
 
 To remove the menu entry, delete these registry keys:
 
