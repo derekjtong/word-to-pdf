@@ -99,6 +99,24 @@ function Confirm-ReplacePdf {
     }
 }
 
+function Update-DocumentFields {
+    param($Document)
+
+    # Refresh fields in every story: body, headers, footers, text boxes, footnotes...
+    foreach ($story in $Document.StoryRanges) {
+        $range = $story
+        while ($range -ne $null) {
+            [void]$range.Fields.Update()
+            $range = $range.NextStoryRange
+        }
+    }
+
+    # TOC-style tables need their own Update() to rebuild entries and page numbers
+    foreach ($toc in $Document.TablesOfContents) { [void]$toc.Update() }
+    foreach ($tof in $Document.TablesOfFigures) { [void]$tof.Update() }
+    foreach ($toa in $Document.TablesOfAuthorities) { [void]$toa.Update() }
+}
+
 try {
     Write-Host "Starting Microsoft Word..."
     $word = New-Object -ComObject Word.Application
@@ -142,6 +160,8 @@ try {
                 $true,
                 $false
             )
+
+            Update-DocumentFields $document
 
             $document.ExportAsFixedFormat($pdfPath, 17)
 
