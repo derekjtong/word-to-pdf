@@ -22,7 +22,7 @@ A PowerShell script that batch-converts Word documents (`.doc`, `.docx`, `.docm`
 | `-Overwrite`     | Replace existing PDFs without asking. Without this flag, the script prompts for each existing PDF. |
 | `-ShowWord`      | Show the Word application window during conversion.                 |
 | `-NoPause`       | Don't wait for a keypress before closing the window.                |
-| `-Quiet`         | Minimal output and no prompts: only the final summary, warnings, and errors are printed. Existing PDFs are skipped unless `-Overwrite` is also given, and the window closes automatically (implies `-NoPause`). |
+| `-Quiet`         | Compact output and no prompts: one progress line per file (`[3/10] report.docx`) plus the final summary, warnings, and errors. Existing PDFs are skipped unless `-Overwrite` is also given, and the window closes automatically (implies `-NoPause`). For full output that still closes automatically, use `-NoPause` alone. |
 
 ### Existing PDFs
 

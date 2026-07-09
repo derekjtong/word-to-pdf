@@ -81,7 +81,7 @@ $documents = Get-ChildItem @searchOptions |
     Where-Object { -not $_.Name.StartsWith("~$") } |
     Sort-Object FullName
 
-Write-Info "Documents found: $($documents.Count)"
+Write-Host "Documents found: $($documents.Count)"
 Write-Info
 
 if (-not $documents) {
@@ -93,6 +93,8 @@ $word = $null
 $converted = 0
 $skipped = 0
 $failed = 0
+$total = $documents.Count
+$index = 0
 $overwriteAll = [bool]$Overwrite
 $skipAll = $false
 
@@ -140,6 +142,7 @@ try {
     Write-Info
 
     foreach ($file in $documents) {
+        $index++
         $pdfPath = [System.IO.Path]::ChangeExtension($file.FullName, ".pdf")
         $pdfExists = Test-Path -LiteralPath $pdfPath -PathType Leaf
         $pdfIsEmpty = $pdfExists -and ((Get-Item -LiteralPath $pdfPath).Length -eq 0)
@@ -157,7 +160,11 @@ try {
             }
 
             if (-not $replace) {
-                Write-Info "Skipping existing PDF: $pdfPath"
+                if ($Quiet) {
+                    Write-Host "[$index/$total] Skipped (PDF exists): $($file.Name)"
+                } else {
+                    Write-Host "Skipping existing PDF: $pdfPath"
+                }
                 $skipped++
                 continue
             }
@@ -166,6 +173,10 @@ try {
         $document = $null
 
         try {
+            if ($Quiet) {
+                Write-Host "[$index/$total] $($file.Name)"
+            }
+
             Write-Info "Exporting: $($file.FullName)"
             Write-Info "Target PDF: $pdfPath"
 
