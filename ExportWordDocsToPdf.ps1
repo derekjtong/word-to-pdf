@@ -3,10 +3,24 @@ param(
     [switch]$Recurse,
     [switch]$Overwrite,
     [switch]$ShowWord,
-    [switch]$NoPause
+    [switch]$NoPause,
+    [switch]$Quiet
 )
 
 $ErrorActionPreference = "Stop"
+
+# Quiet mode: minimal output, no prompts, exit without waiting
+if ($Quiet) {
+    $NoPause = $true
+}
+
+function Write-Info {
+    param([string]$Message = "")
+
+    if (-not $Quiet) {
+        Write-Host $Message
+    }
+}
 
 function Pause-BeforeExit {
     param([int]$ExitCode)
@@ -41,12 +55,12 @@ trap {
 
 $sourceRoot = Get-AbsolutePath $SourcePath
 
-Write-Host "Word to PDF export"
-Write-Host "Source folder: $sourceRoot"
-Write-Host "Include subfolders: $Recurse"
-Write-Host "Overwrite existing PDFs: $Overwrite"
-Write-Host "Show Word window: $ShowWord"
-Write-Host ""
+Write-Info "Word to PDF export"
+Write-Info "Source folder: $sourceRoot"
+Write-Info "Include subfolders: $Recurse"
+Write-Info "Overwrite existing PDFs: $Overwrite"
+Write-Info "Show Word window: $ShowWord"
+Write-Info
 
 if (-not (Test-Path -LiteralPath $sourceRoot -PathType Container)) {
     Write-Error "SourcePath does not exist or is not a folder: $sourceRoot"
@@ -67,11 +81,11 @@ $documents = Get-ChildItem @searchOptions |
     Where-Object { -not $_.Name.StartsWith("~$") } |
     Sort-Object FullName
 
-Write-Host "Documents found: $($documents.Count)"
-Write-Host ""
+Write-Info "Documents found: $($documents.Count)"
+Write-Info
 
 if (-not $documents) {
-    Write-Host "No Word documents found."
+    Write-Info "No Word documents found."
     Pause-BeforeExit 0
 }
 
@@ -118,12 +132,12 @@ function Update-DocumentFields {
 }
 
 try {
-    Write-Host "Starting Microsoft Word..."
+    Write-Info "Starting Microsoft Word..."
     $word = New-Object -ComObject Word.Application
     $word.Visible = [bool]$ShowWord
     $word.DisplayAlerts = 0
-    Write-Host "Microsoft Word started."
-    Write-Host ""
+    Write-Info "Microsoft Word started."
+    Write-Info
 
     foreach ($file in $documents) {
         $pdfPath = [System.IO.Path]::ChangeExtension($file.FullName, ".pdf")
@@ -133,7 +147,8 @@ try {
         if ($pdfExists -and -not $pdfIsEmpty -and -not $overwriteAll) {
             $replace = $false
 
-            if (-not $skipAll) {
+            # Quiet mode never prompts; existing PDFs are skipped unless -Overwrite was given
+            if (-not $skipAll -and -not $Quiet) {
                 switch (Confirm-ReplacePdf $pdfPath) {
                     "Yes" { $replace = $true }
                     "All" { $replace = $true; $overwriteAll = $true }
@@ -142,7 +157,7 @@ try {
             }
 
             if (-not $replace) {
-                Write-Host "Skipping existing PDF: $pdfPath"
+                Write-Info "Skipping existing PDF: $pdfPath"
                 $skipped++
                 continue
             }
@@ -151,8 +166,8 @@ try {
         $document = $null
 
         try {
-            Write-Host "Exporting: $($file.FullName)"
-            Write-Host "Target PDF: $pdfPath"
+            Write-Info "Exporting: $($file.FullName)"
+            Write-Info "Target PDF: $pdfPath"
 
             $document = $word.Documents.Open(
                 $file.FullName,
@@ -165,8 +180,8 @@ try {
 
             $document.ExportAsFixedFormat($pdfPath, 17)
 
-            Write-Host "Created: $pdfPath"
-            Write-Host ""
+            Write-Info "Created: $pdfPath"
+            Write-Info
             $converted++
         }
         catch {
@@ -183,13 +198,13 @@ try {
 }
 finally {
     if ($word -ne $null) {
-        Write-Host "Closing Microsoft Word..."
+        Write-Info "Closing Microsoft Word..."
         $word.Quit()
         [void][System.Runtime.InteropServices.Marshal]::ReleaseComObject($word)
     }
 }
 
-Write-Host ""
+Write-Info
 Write-Host "Done. Converted: $converted; skipped: $skipped; failed: $failed"
 
 if ($failed -gt 0) {

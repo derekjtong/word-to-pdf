@@ -10,7 +10,7 @@ A PowerShell script that batch-converts Word documents (`.doc`, `.docx`, `.docm`
 ## Usage
 
 ```powershell
-.\ExportWordDocsToPdf.ps1 [-SourcePath <path>] [-Recurse] [-Overwrite] [-ShowWord] [-NoPause]
+.\ExportWordDocsToPdf.ps1 [-SourcePath <path>] [-Recurse] [-Overwrite] [-ShowWord] [-NoPause] [-Quiet]
 ```
 
 ### Parameters
@@ -22,6 +22,7 @@ A PowerShell script that batch-converts Word documents (`.doc`, `.docx`, `.docm`
 | `-Overwrite`     | Replace existing PDFs without asking. Without this flag, the script prompts for each existing PDF. |
 | `-ShowWord`      | Show the Word application window during conversion.                 |
 | `-NoPause`       | Don't wait for a keypress before closing the window.                |
+| `-Quiet`         | Minimal output and no prompts: only the final summary, warnings, and errors are printed. Existing PDFs are skipped unless `-Overwrite` is also given, and the window closes automatically (implies `-NoPause`). |
 
 ### Existing PDFs
 
@@ -37,7 +38,7 @@ Replace it? [Y]es / [N]o / [A]ll / n[o]ne
 - **A** — replace this and all remaining PDFs without asking again
 - **O** — skip this and all remaining existing PDFs without asking again
 
-Pass `-Overwrite` to skip the prompt entirely and replace everything.
+Pass `-Overwrite` to skip the prompt entirely and replace everything. With `-Quiet`, the script never prompts: existing PDFs are replaced if `-Overwrite` is given and skipped otherwise.
 
 ### Example
 
