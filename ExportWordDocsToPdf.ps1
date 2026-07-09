@@ -79,6 +79,25 @@ $word = $null
 $converted = 0
 $skipped = 0
 $failed = 0
+$overwriteAll = [bool]$Overwrite
+$skipAll = $false
+
+function Confirm-ReplacePdf {
+    param([string]$PdfPath)
+
+    while ($true) {
+        Write-Host "PDF already exists: $PdfPath"
+        $answer = Read-Host "Replace it? [Y]es / [N]o / [A]ll / n[o]ne"
+
+        switch ($answer.Trim().ToLowerInvariant()) {
+            "y" { return "Yes" }
+            "n" { return "No" }
+            "a" { return "All" }
+            "o" { return "None" }
+            default { Write-Host "Please answer Y, N, A, or O." }
+        }
+    }
+}
 
 try {
     Write-Host "Starting Microsoft Word..."
@@ -93,10 +112,22 @@ try {
         $pdfExists = Test-Path -LiteralPath $pdfPath -PathType Leaf
         $pdfIsEmpty = $pdfExists -and ((Get-Item -LiteralPath $pdfPath).Length -eq 0)
 
-        if ($pdfExists -and -not $pdfIsEmpty -and -not $Overwrite) {
-            Write-Host "Skipping existing PDF: $pdfPath"
-            $skipped++
-            continue
+        if ($pdfExists -and -not $pdfIsEmpty -and -not $overwriteAll) {
+            $replace = $false
+
+            if (-not $skipAll) {
+                switch (Confirm-ReplacePdf $pdfPath) {
+                    "Yes" { $replace = $true }
+                    "All" { $replace = $true; $overwriteAll = $true }
+                    "None" { $skipAll = $true }
+                }
+            }
+
+            if (-not $replace) {
+                Write-Host "Skipping existing PDF: $pdfPath"
+                $skipped++
+                continue
+            }
         }
 
         $document = $null
